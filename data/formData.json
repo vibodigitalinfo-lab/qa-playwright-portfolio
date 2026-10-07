@@ -1,0 +1,8 @@
+{
+  "validUser": {
+    "fullName": "Iván Martínez",
+    "email": "ivan.qa@example.com",
+    "currentAddress": "Calle Mayor 15, Madrid",
+    "permanentAddress": "Calle Mayor 15, Madrid"
+  }
+}

@@ -7,20 +7,22 @@ export class FormPage {
   readonly currentAddressInput: Locator;
   readonly permanentAddressInput: Locator;
   readonly submitButton: Locator;
-  readonly outputName: Locator; // Añadido para la validación del resultado
+  readonly outputContainer: Locator;
+  readonly outputName: Locator;
 
   constructor(page: Page) {
-    this.page = page; // Asignamos la página recibida
-    this.fullNameInput = page.locator('#userName');
-    this.emailInput = page.locator('#userEmail');
-    this.currentAddressInput = page.locator('#currentAddress');
+    this.page = page;
+    // Locadores basados en buenas prácticas de Playwright
+    this.fullNameInput = page.getByPlaceholder('Full Name');
+    this.emailInput = page.getByPlaceholder('name@example.com');
+    this.currentAddressInput = page.getByPlaceholder('Current Address');
     this.permanentAddressInput = page.locator('#permanentAddress');
-    this.submitButton = page.locator('#submit');
-    this.outputName = page.locator('#name'); // Selector del resultado
+    this.submitButton = page.getByRole('button', { name: 'Submit' });
+    this.outputContainer = page.locator('#output');
+    this.outputName = page.locator('#name');
   }
 
   async goto() {
-    // URL limpia sin marcas de formato
     await this.page.goto('https://demoqa.com/text-box');
   }
 
@@ -29,11 +31,22 @@ export class FormPage {
     await this.emailInput.fill(email);
     await this.currentAddressInput.fill(currentAddr);
     await this.permanentAddressInput.fill(permAddr);
-    await this.submitButton.click(); // Añadido el click en Submit
+
+    // Ocultar/eliminar anuncios y footers fijos que obstruyen el botón de envío
+    await this.page.evaluate(() => {
+      const fixedBan = document.querySelector('#fixedban');
+      const footer = document.querySelector('footer');
+      if (fixedBan) fixedBan.remove();
+      if (footer) footer.remove();
+    });
+
+    // Scroll y click limpio (sin force: true)
+    await this.submitButton.scrollIntoViewIfNeeded();
+    await this.submitButton.click();
   }
 
   async verifyOutput(expectedName: string) {
-    // Aserción correcta sobre el elemento de salida
+    await expect(this.outputContainer).toBeVisible();
     await expect(this.outputName).toContainText(expectedName);
   }
 }
